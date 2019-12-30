@@ -35,7 +35,7 @@ https://drive.google.com/open?id=1H7rs2m75rARB9vTDlubwng_WPfVodCpw
 ### Domain models and vars:
 - Cell: every cell on map: has status = false (dead) or true (alive)
 - World / Map / Array of life: array of cells
-- Year: fom 0 to 100
+- Year: fom 0 to >0
 - Population, births, deaths ...
 ---
 
