@@ -263,6 +263,7 @@ public class Game extends JPanel {
 
 
         int neighbours = 0;
+        String excMsg = "";
 
 
         // terrrrribleeeeee - FIX THIS
@@ -272,7 +273,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+            excMsg = e.getMessage();
         }
 
         try {
@@ -280,7 +281,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+            excMsg = e.getMessage();
         }
 
         try {
@@ -288,7 +289,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+            excMsg = e.getMessage();
         }
 
         try {
@@ -296,7 +297,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+            excMsg = e.getMessage();
         }
 
         try {
@@ -304,7 +305,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+            excMsg = e.getMessage();
         }
 
         try {
@@ -312,7 +313,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+            excMsg = e.getMessage();
         }
 
         try {
@@ -320,7 +321,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+            excMsg = e.getMessage();
         }
 
         try {
@@ -328,7 +329,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+            excMsg = e.getMessage();
         }
 
         return neighbours;
