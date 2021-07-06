@@ -68,8 +68,8 @@ public class Game extends JPanel {
 
     /**
      * deep copy of multidimensional object array
-     * @param src
-     * @return
+     * @param src - input array
+     * @return temp - copied array
      */
     public static Cell[][] MDOAcopy(Cell[][] src) {
 
@@ -81,7 +81,9 @@ public class Game extends JPanel {
             for (int j = 0; j < src[i].length; j++) {
                 try {
                     temp[i][j] = (Cell)src[i][j].clone();
-                }catch(CloneNotSupportedException c){}
+                }catch(CloneNotSupportedException c){
+                    System.out.println(c.getMessage());
+                }
             }
         }
 
@@ -92,7 +94,7 @@ public class Game extends JPanel {
      * GAME LOOP
      * 10 start year
      *
-     * @param newYear
+     * @param newYear - number of a year to come
      */
     private void startNewYear(int newYear) {
         switch (newYear) {
@@ -116,33 +118,59 @@ public class Game extends JPanel {
 
         world = new Cell[rows][columns];
 
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
+        for (int row = 0; row < rows; row++) {
+            for (int column = 0; column < columns; column++) {
                 cell = new Cell();
-                cell.setPosition_x(j);
-                cell.setPosition_y(i);
+                cell.setPosition_x(column);
+                cell.setPosition_y(row);
 
                 // glider
-                if (i == 10 && j == 25) {
+//                if (row == 10 && column == 25) {
+//                    cell.setStatus(true);
+//                } else if (row == 11 && column == 26) {
+//                    cell.setStatus(true);
+//                } else if (row == 12 && column == 24) {
+//                    cell.setStatus(true);
+//                } else if (row == 12 && column == 25) {
+//                    cell.setStatus(true);
+//                } else if (row == 12 && column == 26) {
+//                    cell.setStatus(true);
+//                } else {
+//                    cell.setStatus(false);
+//                }
+
+                // oscillator
+//                if (row == 10 && column == 25) {
+//                    cell.setStatus(true);
+//                } else if (row == 10 && column == 26) {
+//                    cell.setStatus(true);
+//                } else if (row == 10 && column == 27) {
+//                    cell.setStatus(true);
+//                } else {
+//                    cell.setStatus(false);
+//                }
+
+                // crazy tetromino
+                if (row == 10 && column == 25) {
                     cell.setStatus(true);
-                } else if (i == 11 && j == 26) {
+                } else if (row == 11 && column == 24) {
                     cell.setStatus(true);
-                } else if (i == 12 && j == 24) {
+                } else if (row == 11 && column == 25) {
                     cell.setStatus(true);
-                } else if (i == 12 && j == 25) {
-                    cell.setStatus(true);
-                } else if (i == 12 && j == 26) {
+                } else if (row == 11 && column == 26) {
                     cell.setStatus(true);
                 } else {
                     cell.setStatus(false);
                 }
 
-                // oscillator
-//                if (i == 10 && j == 25) {
+//                // tetrominos' death
+//                if (row == 10 && column == 25) {
 //                    cell.setStatus(true);
-//                } else if (i == 10 && j == 26) {
+//                } else if (row == 11 && column == 26) {
 //                    cell.setStatus(true);
-//                } else if (i == 10 && j == 27) {
+//                } else if (row == 11 && column == 27) {
+//                    cell.setStatus(true);
+//                } else if (row == 11 && column == 28) {
 //                    cell.setStatus(true);
 //                } else {
 //                    cell.setStatus(false);
@@ -150,7 +178,7 @@ public class Game extends JPanel {
 
 
 
-                world[i][j] = cell;
+                world[row][column] = cell;
             }
         }
 
@@ -244,6 +272,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
         }
 
         try {
@@ -251,6 +280,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
         }
 
         try {
@@ -258,6 +288,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
         }
 
         try {
@@ -265,6 +296,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
         }
 
         try {
@@ -272,6 +304,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
         }
 
         try {
@@ -279,6 +312,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
         }
 
         try {
@@ -286,6 +320,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
         }
 
         try {
@@ -293,6 +328,7 @@ public class Game extends JPanel {
                 neighbours++;
             }
         } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
         }
 
         return neighbours;
@@ -310,7 +346,7 @@ public class Game extends JPanel {
      * DRAW WORLD-MAP FROM ARRAY OF LIFE
      * 30 populate world
      *
-     * @param g
+     * @param g - Graphics object
      */
     @Override
     public void paintComponent(Graphics g) {
@@ -340,6 +376,7 @@ public class Game extends JPanel {
         g.drawString("POPULATION: " + population, 20, 55);
         g.drawString("BIRTHS: " + births, 20, 75);
         g.drawString("DEATHS: " + deaths, 20, 95);
+        g.drawString("Djordje Gavrilovic", 865, 455);
 
         year++;
         startNewYear(year);
