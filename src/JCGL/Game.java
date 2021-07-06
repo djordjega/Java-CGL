@@ -8,10 +8,15 @@ import java.util.Random;
  * Cell class
  * can be dead or alive
  */
-class Cell {
-    boolean status;
+class Cell implements Cloneable{
+
+    boolean status; // dead or alive
     int position_x; // column
     int position_y; // row
+
+    public Object clone()throws CloneNotSupportedException{
+        return super.clone();
+    }
 
     public boolean isAlive() {
         return status;
@@ -36,6 +41,7 @@ class Cell {
     public void setPosition_y(int position_y) {
         this.position_y = position_y;
     }
+
 }
 
 /**
@@ -47,7 +53,13 @@ public class Game extends JPanel {
     int year = 0;
     int births = 0;
     int deaths = 0;
-    Cell[][] world; // array of life - cells 50x20
+    static int rows = 23;
+    static int columns = 50;
+    Cell[][] world; // array of life - cells 50x23
+    Cell[][] limbo; // world in between two realms
+    Cell cell; // resident of the world
+    Cell ghost; // resident of limbo
+
 
     public Game() {
         this.setBackground(Color.BLACK);
@@ -55,14 +67,38 @@ public class Game extends JPanel {
     }
 
     /**
+     * deep copy of multidimensional object array
+     * @param src
+     * @return
+     */
+    public static Cell[][] MDOAcopy(Cell[][] src) {
+
+        Cell[][] temp = new Cell[rows][columns];
+
+        for (int i = 0; i < src.length; i++) {
+            temp[i] = new Cell[src[i].length];
+
+            for (int j = 0; j < src[i].length; j++) {
+                try {
+                    temp[i][j] = (Cell)src[i][j].clone();
+                }catch(CloneNotSupportedException c){}
+            }
+        }
+
+        return temp;
+    }
+
+    /**
      * GAME LOOP
      * 10 start year
-     * @param new_year
+     *
+     * @param newYear
      */
-    private void startNewYear(int new_year) {
-        switch (new_year) {
+    private void startNewYear(int newYear) {
+        switch (newYear) {
             case 0:
-                firstLife();
+//                firstLife();
+                patternBeginning();
                 break;
             case 201:
                 endWorld();
@@ -74,16 +110,63 @@ public class Game extends JPanel {
     }
 
     /**
+     * create the initial world from a pattern
+     */
+    private void patternBeginning() {
+
+        world = new Cell[rows][columns];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                cell = new Cell();
+                cell.setPosition_x(j);
+                cell.setPosition_y(i);
+
+                // glider
+                if (i == 10 && j == 25) {
+                    cell.setStatus(true);
+                } else if (i == 11 && j == 26) {
+                    cell.setStatus(true);
+                } else if (i == 12 && j == 24) {
+                    cell.setStatus(true);
+                } else if (i == 12 && j == 25) {
+                    cell.setStatus(true);
+                } else if (i == 12 && j == 26) {
+                    cell.setStatus(true);
+                } else {
+                    cell.setStatus(false);
+                }
+
+                // oscillator
+//                if (i == 10 && j == 25) {
+//                    cell.setStatus(true);
+//                } else if (i == 10 && j == 26) {
+//                    cell.setStatus(true);
+//                } else if (i == 10 && j == 27) {
+//                    cell.setStatus(true);
+//                } else {
+//                    cell.setStatus(false);
+//                }
+
+
+
+                world[i][j] = cell;
+            }
+        }
+
+        repaint();
+    }
+
+    /**
      * INITIAL LIFE - YEAR 0
      * 20 randomly generate x number of entities/cells
      */
     private void firstLife() {
-        world = new Cell[20][50];
+        world = new Cell[rows][columns];
         Random r;
-        Cell cell;
 
-        for(int i=0; i<world.length; i++) {
-            for(int j=0; j<world[i].length; j++) {
+        for (int i = 0; i < world.length; i++) {
+            for (int j = 0; j < world[i].length; j++) {
                 r = new Random();
                 cell = new Cell();
                 boolean initial_status = r.nextBoolean();
@@ -102,76 +185,115 @@ public class Game extends JPanel {
      */
     private void checkCellStatus() {
         try {
-            Thread.sleep(100);
+            Thread.sleep(250);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        Cell cell;
-        boolean status;
+        limbo = MDOAcopy(world);
 
-        for (int i=0; i<world.length; i++) {
-            for (int j=0; j<world[i].length; j++) {
+        for (int i = 0; i < world.length; i++) {
+            for (int j = 0; j < world[i].length; j++) {
+
                 cell = world[i][j];
-                int neighbours = getNumberOfNeighbours(i,j);
-                // RULE 1 - Any live cell with fewer than two live neighbours dies (as if by needs caused by underpopulation).
-                // RULE 2 - Any live cell with more than three live neighbours dies (as if by overcrowding).
-                // RULE 3 - Any live cell with two or three live neighbours lives (unchanged, to the next generation).
-                if ( cell.isAlive() && ( neighbours == 2 || neighbours == 3 ) ) {
-                    continue;
-                } else if ( !cell.isAlive() && neighbours == 3 ) {
-                    // RULE 4 - Any dead cell with exactly three live neighbours becomes a live cell (as if by reproduction).
-                    cell.setStatus(true);
+                ghost = limbo[i][j];
+                int neighbours = getNumberOfNeighbours(i, j);
+
+                // cell is lonely and dies
+                if (cell.isAlive() && neighbours < 2) {
+                    ghost.setStatus(false);
+                    deaths++;
+                }
+
+                // cell dies due to overpopulation
+                if (cell.isAlive() && neighbours > 3) {
+                    ghost.setStatus(false);
+                    deaths++;
+                }
+
+                // cell is born
+                if (!cell.isAlive() && neighbours == 3) {
+                    ghost.setStatus(true);
                     births++;
-                } else {
-                    cell.setStatus(false);
-                    //deaths++; // no good ?!
                 }
             }
         }
+
+        world = limbo;
+
         repaint();
     }
 
     /**
-     * TODO
-     * @param row world[]
+     * inspect the surrounding cells and return the number of alive neighbours
+     *
+     * @param row    world[]
      * @param column world[][]
      * @return int number of neighbours
      */
     private int getNumberOfNeighbours(int row, int column) {
-        int neighbours=0;
+
+
+        int neighbours = 0;
+
+
+        // terrrrribleeeeee - FIX THIS
 
         try {
-            if (world[row-1][column-1].isAlive()) { neighbours++; }
-        } catch (IndexOutOfBoundsException e) {}
+            if (world[row - 1][column - 1].isAlive()) {
+                neighbours++;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         try {
-            if (world[row-1][column].isAlive()) { neighbours++; }
-        } catch (IndexOutOfBoundsException e) {}
+            if (world[row - 1][column].isAlive()) {
+                neighbours++;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         try {
-            if (world[row-1][column+1].isAlive()) { neighbours++; }
-        } catch (IndexOutOfBoundsException e) {}
+            if (world[row - 1][column + 1].isAlive()) {
+                neighbours++;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         try {
-            if (world[row][column-1].isAlive()) { neighbours++; }
-        } catch (IndexOutOfBoundsException e) {}
+            if (world[row][column - 1].isAlive()) {
+                neighbours++;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         try {
-            if (world[row][column+1].isAlive()) { neighbours++; }
-        } catch (IndexOutOfBoundsException e) {}
+            if (world[row][column + 1].isAlive()) {
+                neighbours++;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         try {
-            if (world[row+1][column-1].isAlive()) { neighbours++; }
-        } catch (IndexOutOfBoundsException e) {}
+            if (world[row + 1][column - 1].isAlive()) {
+                neighbours++;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         try {
-            if (world[row+1][column].isAlive()) { neighbours++; }
-        } catch (IndexOutOfBoundsException e) {}
+            if (world[row + 1][column].isAlive()) {
+                neighbours++;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         try {
-            if (world[row+1][column+1].isAlive()) { neighbours++; }
-        } catch (IndexOutOfBoundsException e) {}
+            if (world[row + 1][column + 1].isAlive()) {
+                neighbours++;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
 
         return neighbours;
     }
@@ -187,25 +309,28 @@ public class Game extends JPanel {
     /**
      * DRAW WORLD-MAP FROM ARRAY OF LIFE
      * 30 populate world
+     *
      * @param g
      */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Cell cell;
+
         int population = 0;
 
-        for (int i=0; i<world.length; i++) {
-            for (int j=0; j<world[i].length; j++) {
+        for (int i = 0; i < world.length; i++) {
+            for (int j = 0; j < world[i].length; j++) {
                 cell = world[i][j];
                 g.setColor(Color.DARK_GRAY);
-                g.drawRect(cell.getPosition_x()*20, cell.getPosition_y()*20,20,20);
+                g.drawRect(cell.getPosition_x() * 20, cell.getPosition_y() * 20, 20, 20);
                 if (cell.isAlive()) {
                     population++;
                     g.setColor(Color.decode("#24b30e"));
-                    g.fillOval(cell.getPosition_x()*20, cell.getPosition_y()*20,20,20);
+                    g.fillOval(cell.getPosition_x() * 20, cell.getPosition_y() * 20, 20, 20);
                     g.setColor(Color.GREEN);
-                    g.fillOval(cell.getPosition_x()*20+3, cell.getPosition_y()*20+3,15,15);
+                    g.fillOval(cell.getPosition_x() * 20 + 3, cell.getPosition_y() * 20 + 3, 15, 15);
+                    g.setColor(Color.WHITE);
+                    g.fillOval(cell.getPosition_x() * 20 + 5, cell.getPosition_y() * 20 + 5, 3, 3);
                 }
             }
         }

@@ -16,6 +16,7 @@
     elseif year == 100 GOTO 50 
     else GOTO 30
 20 randomly generate x number of entities/cells
+    draw -> GOTO 10
 30 populate world 
     go trough the statuses and draw
     year++
